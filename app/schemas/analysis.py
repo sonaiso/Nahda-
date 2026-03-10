@@ -222,3 +222,44 @@ class ManatApplyResponse(BaseModel):
     manat: list[ManatItemOut]
     tanzil_decisions: list[TanzilDecisionOut]
     metrics: ManatApplyMetrics
+
+
+class LayerExecutionOut(BaseModel):
+    layer_name: str
+    success: bool
+    quality_score: float
+    details: dict
+
+
+class ExplainSummaryOut(BaseModel):
+    unicode_scalars: int
+    graphemes: int
+    phonetic_atoms: int
+    syllables: int
+    patterns: int
+    lexemes: int
+    meanings: int
+    indications: int
+    relations: int
+    speech: int
+    inferences: int
+    rules: int
+    manat: int
+
+
+class ExplainResponse(BaseModel):
+    run_id: str
+    status: str
+    layers: list[LayerExecutionOut]
+    summary: ExplainSummaryOut
+
+
+class TraceEventOut(BaseModel):
+    sequence: int
+    event_type: str
+    payload: dict
+
+
+class TraceResponse(BaseModel):
+    run_id: str
+    events: list[TraceEventOut]

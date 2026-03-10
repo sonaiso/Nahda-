@@ -101,3 +101,36 @@ def test_manat_apply_endpoint_suspend_on_missing_feature() -> None:
         data = response.json()
         assert data["metrics"]["suspend_count"] >= 1
         assert isinstance(data["tanzil_decisions"], list)
+
+
+def test_explain_and_trace_endpoints() -> None:
+    payload = {
+        "text": "لا كتاب في البيت",
+        "external_case_id": "case-003",
+        "description": "trace check",
+        "case_features": [
+            {
+                "feature_key": "كتاب",
+                "feature_value": "present",
+                "verification_state": "verified",
+            }
+        ],
+    }
+    with TestClient(create_app()) as client:
+        apply_response = client.post("/manat/apply", json=payload)
+        assert apply_response.status_code == 200
+        run_id = apply_response.json()["run_id"]
+
+        explain_response = client.get(f"/explain/{run_id}")
+        assert explain_response.status_code == 200
+        explain_data = explain_response.json()
+        assert explain_data["run_id"] == run_id
+        assert "summary" in explain_data
+        assert explain_data["summary"]["rules"] >= 1
+
+        trace_response = client.get(f"/trace/{run_id}")
+        assert trace_response.status_code == 200
+        trace_data = trace_response.json()
+        assert trace_data["run_id"] == run_id
+        assert isinstance(trace_data["events"], list)
+        assert len(trace_data["events"]) >= 1
