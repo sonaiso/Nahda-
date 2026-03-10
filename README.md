@@ -21,6 +21,7 @@ Public endpoints:
 - `POST /auth/token`
 - `GET /health/live`
 - `GET /health/ready`
+- `GET /health/metrics`
 
 Protected endpoints (Bearer token required):
 
@@ -144,8 +145,15 @@ Health endpoints:
 
 - `GET /health/live`
 - `GET /health/ready`
+- `GET /health/metrics`
 
 Rate limiting is enabled by default and configurable through `.env`.
+
+Observability defaults:
+
+- every response includes `X-Request-ID`
+- structured access logs are emitted per request
+- in-memory operational metrics are exposed via `GET /health/metrics`
 
 Swagger UI:
 
