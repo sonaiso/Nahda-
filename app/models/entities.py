@@ -185,3 +185,75 @@ class RelationUnit(Base):
     relation_type: Mapped[str] = mapped_column(String(24), index=True)
     source_ref: Mapped[str] = mapped_column(String(128), index=True)
     target_ref: Mapped[str] = mapped_column(String(128), index=True)
+
+
+class SpeechUnit(Base):
+    __tablename__ = "speech_units"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    segment_id: Mapped[str] = mapped_column(ForeignKey("document_segments.id", ondelete="CASCADE"), index=True)
+    speech_type: Mapped[str] = mapped_column(String(16), index=True)
+    prev_speech_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    next_speech_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+
+class InferenceUnit(Base):
+    __tablename__ = "inference_units"
+    __table_args__ = (
+        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="ck_inference_confidence"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    speech_id: Mapped[str] = mapped_column(ForeignKey("speech_units.id", ondelete="CASCADE"), index=True)
+    mantuq_json: Mapped[list] = mapped_column(JSON, default=list)
+    illa_explicit_json: Mapped[list] = mapped_column(JSON, default=list)
+    illa_implied_json: Mapped[list] = mapped_column(JSON, default=list)
+    confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
+
+
+class InferenceMafhumItem(Base):
+    __tablename__ = "inference_mafhum_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    inference_id: Mapped[str] = mapped_column(ForeignKey("inference_units.id", ondelete="CASCADE"), index=True)
+    mafhum_type: Mapped[str] = mapped_column(String(24), index=True)
+    content: Mapped[str] = mapped_column(Text)
+
+
+class RuleUnit(Base):
+    __tablename__ = "rule_units"
+    __table_args__ = (
+        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="ck_rule_confidence"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    inference_id: Mapped[str] = mapped_column(ForeignKey("inference_units.id", ondelete="CASCADE"), index=True)
+    hukm_text: Mapped[str] = mapped_column(Text)
+    evidence_rank: Mapped[str] = mapped_column(String(16), index=True)
+    tarjih_basis: Mapped[str] = mapped_column(String(64))
+    confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
+
+
+class RuleConflict(Base):
+    __tablename__ = "rule_conflicts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    rule_a_id: Mapped[str] = mapped_column(ForeignKey("rule_units.id", ondelete="CASCADE"), index=True)
+    rule_b_id: Mapped[str] = mapped_column(ForeignKey("rule_units.id", ondelete="CASCADE"), index=True)
+    conflict_type: Mapped[str] = mapped_column(String(24), default="opposition")
+    resolved: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class TarjihDecision(Base):
+    __tablename__ = "tarjih_decisions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    conflict_id: Mapped[str] = mapped_column(ForeignKey("rule_conflicts.id", ondelete="CASCADE"), index=True)
+    winning_rule_id: Mapped[str] = mapped_column(ForeignKey("rule_units.id", ondelete="CASCADE"), index=True)
+    basis: Mapped[str] = mapped_column(String(64), default="strength_of_evidence")
+    discarded_rule_ids_json: Mapped[list] = mapped_column(JSON, default=list)
