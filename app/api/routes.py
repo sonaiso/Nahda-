@@ -7,6 +7,7 @@ from app.api import infer_routes
 from app.api import rule_routes
 from app.api import manat_routes
 from app.api import explainability_routes
+from app.api import health_routes
 
 router = APIRouter()
 router.include_router(unicode_routes.router, tags=["unicode"])
@@ -16,3 +17,4 @@ router.include_router(infer_routes.router, tags=["inference"])
 router.include_router(rule_routes.router, tags=["rule"])
 router.include_router(manat_routes.router, tags=["manat"])
 router.include_router(explainability_routes.router, tags=["explainability"])
+router.include_router(health_routes.router, tags=["health"])

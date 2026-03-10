@@ -2,6 +2,18 @@ from fastapi.testclient import TestClient
 
 from app.main import create_app
 
+
+def test_health_endpoints() -> None:
+    with TestClient(create_app()) as client:
+        live_response = client.get("/health/live")
+        assert live_response.status_code == 200
+        assert live_response.json()["status"] == "ok"
+
+        ready_response = client.get("/health/ready")
+        assert ready_response.status_code == 200
+        assert ready_response.json()["status"] == "ready"
+
+
 def test_unicode_endpoint() -> None:
     payload = {"text": "إِنَّ الكِتَاب"}
     with TestClient(create_app()) as client:

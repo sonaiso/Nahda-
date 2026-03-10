@@ -98,6 +98,33 @@ python -m pip install -e '.[dev]'
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
+With PostgreSQL (recommended):
+
+```bash
+cp .env.example .env
+docker compose up -d db
+python -m pip install -e '.[dev]'
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The app will use `NAHDA_DATABASE_URL` from `.env`.
+
+## Run With Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Services:
+
+- API: `http://localhost:8000`
+- PostgreSQL: `localhost:5432`
+
+Health endpoints:
+
+- `GET /health/live`
+- `GET /health/ready`
+
 Swagger UI:
 
 - `http://localhost:8000/docs`
@@ -107,3 +134,9 @@ Swagger UI:
 ```bash
 python -m pytest -q
 ```
+
+CI quality gate runs:
+
+- `ruff check .`
+- `mypy`
+- `pytest -q` with coverage fail-under `85%`
