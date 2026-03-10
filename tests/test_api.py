@@ -62,3 +62,42 @@ def test_rule_evaluate_endpoint() -> None:
         assert data["metrics"]["rule_count"] >= 1
         assert isinstance(data["rules"], list)
         assert isinstance(data["tarjih_decisions"], list)
+
+
+def test_manat_apply_endpoint_true_or_false() -> None:
+    payload = {
+        "text": "لا كتاب في البيت",
+        "external_case_id": "case-001",
+        "description": "book is present",
+        "case_features": [
+            {
+                "feature_key": "كتاب",
+                "feature_value": "present",
+                "verification_state": "verified",
+            }
+        ],
+    }
+    with TestClient(create_app()) as client:
+        response = client.post("/manat/apply", json=payload)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["metrics"]["rule_evaluated_count"] >= 1
+        assert isinstance(data["manat"], list)
+        assert data["manat"][0]["applies_state"] in {"true", "false", "suspend"}
+
+
+def test_manat_apply_endpoint_suspend_on_missing_feature() -> None:
+    payload = {
+        "text": "لا كتاب في البيت",
+        "external_case_id": "case-002",
+        "description": "missing feature input",
+        "case_features": [],
+    }
+    with TestClient(create_app()) as client:
+        response = client.post("/manat/apply", json=payload)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["metrics"]["suspend_count"] >= 1
+        assert isinstance(data["tanzil_decisions"], list)
