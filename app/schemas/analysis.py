@@ -107,3 +107,67 @@ class SemanticsAnalyzeResponse(BaseModel):
     indications: list[IndicationOut]
     relations: list[RelationOut]
     metrics: SemanticsMetrics
+
+
+class MafhumOut(BaseModel):
+    iqtida: list[str]
+    ishara: list[str]
+    ima: list[str]
+    muwafaqa: list[str]
+    mukhalafa: list[str]
+
+
+class InferenceOut(BaseModel):
+    speech_type: str
+    mantuq: list[str]
+    mafhum: MafhumOut
+    confidence_score: float
+
+
+class InferMetrics(BaseModel):
+    speech_count: int
+    inference_count: int
+    mafhum_item_count: int
+    avg_inference_confidence: float
+
+
+class InferResponse(BaseModel):
+    run_id: str
+    normalized_text: str
+    inference: list[InferenceOut]
+    metrics: InferMetrics
+
+
+class RuleOut(BaseModel):
+    hukm_text: str
+    evidence_rank: str
+    tarjih_basis: str
+    confidence_score: float
+
+
+class ConflictOut(BaseModel):
+    conflict_type: str
+    rule_a_ref: str
+    rule_b_ref: str
+    resolved: bool
+
+
+class TarjihOut(BaseModel):
+    winning_rule_ref: str
+    basis: str
+    discarded_rule_refs: list[str]
+
+
+class RuleEvaluateMetrics(BaseModel):
+    rule_count: int
+    conflict_count: int
+    resolved_conflict_count: int
+    avg_rule_confidence: float
+
+
+class RuleEvaluateResponse(BaseModel):
+    run_id: str
+    rules: list[RuleOut]
+    conflicts: list[ConflictOut]
+    tarjih_decisions: list[TarjihOut]
+    metrics: RuleEvaluateMetrics

@@ -11,6 +11,12 @@ from app.models.entities import PipelineRun
 from app.models.entities import ProcessingError
 from app.models.entities import IndicationUnit
 from app.models.entities import RelationUnit
+from app.models.entities import SpeechUnit
+from app.models.entities import InferenceUnit
+from app.models.entities import InferenceMafhumItem
+from app.models.entities import RuleUnit
+from app.models.entities import RuleConflict
+from app.models.entities import TarjihDecision
 from app.models.entities import SyllableUnit
 from app.models.entities import UnicodeScalar
 
@@ -30,4 +36,10 @@ __all__ = [
     "MeaningSense",
     "IndicationUnit",
     "RelationUnit",
+    "SpeechUnit",
+    "InferenceUnit",
+    "InferenceMafhumItem",
+    "RuleUnit",
+    "RuleConflict",
+    "TarjihDecision",
 ]
