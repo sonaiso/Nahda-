@@ -22,12 +22,16 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 - `POST /infer`
 - `POST /rule/evaluate`
 - `POST /manat/apply`
+- `GET /explain/{run_id}`
+- `GET /trace/{run_id}`
 - `POST /v1/analyze/unicode`
 - `POST /v1/analyze/morphology`
 - `POST /v1/analyze/semantics`
 - `POST /v1/infer`
 - `POST /v1/rule/evaluate`
 - `POST /v1/manat/apply`
+- `GET /v1/explain/{run_id}`
+- `GET /v1/trace/{run_id}`
 
 ### Request Body
 
@@ -84,6 +88,8 @@ Phase 2 migration: `migrations/002_semantic_core.sql`
 Phase 3 migration: `migrations/003_inference_core.sql`
 
 Phase 4 migration: `migrations/004_manat_tanzil_core.sql`
+
+Phase 5 migration: `migrations/005_explainability_observability.sql`
 
 ## Run Locally
 

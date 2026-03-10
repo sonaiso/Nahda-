@@ -22,6 +22,8 @@ from app.models.entities import CaseFeature
 from app.models.entities import ManatUnit
 from app.models.entities import TanzilDecision
 from app.models.entities import ApplicabilityCheck
+from app.models.entities import AuditEvent
+from app.models.entities import ExplainabilityTrace
 from app.models.entities import SyllableUnit
 from app.models.entities import UnicodeScalar
 
@@ -52,4 +54,6 @@ __all__ = [
     "ManatUnit",
     "TanzilDecision",
     "ApplicabilityCheck",
+    "AuditEvent",
+    "ExplainabilityTrace",
 ]
