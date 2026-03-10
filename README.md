@@ -18,8 +18,10 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 
 - `POST /analyze/unicode`
 - `POST /analyze/morphology`
+- `POST /analyze/semantics`
 - `POST /v1/analyze/unicode`
 - `POST /v1/analyze/morphology`
+- `POST /v1/analyze/semantics`
 
 ### Request Body
 
@@ -44,6 +46,13 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 - `valid_syllable_ratio`
 - `triliteral_root_ratio`
 
+### Semantics Metrics
+
+- `lexeme_count`
+- `independent_lexeme_ratio`
+- `indication_coverage_ratio`
+- `relation_count`
+
 ## Database Tables (MVP)
 
 ### Core Runtime
@@ -63,6 +72,8 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 - `pattern_units`
 
 Migration SQL: `migrations/001_mvp_l0_l4.sql`
+
+Phase 2 migration: `migrations/002_semantic_core.sql`
 
 ## Run Locally
 
