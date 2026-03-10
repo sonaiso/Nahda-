@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     observability_enabled: bool = True
     observability_include_path_labels: bool = True
+    otel_enabled: bool = True
+    otel_service_name: str = "nahda-engine"
+    otel_exporter: str = "none"
+    otel_otlp_endpoint: str = "http://localhost:4318/v1/traces"
+    otel_sampling_ratio: float = 1.0
 
 
 settings = Settings()

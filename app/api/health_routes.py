@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse
 
 from app.core.observability import get_metrics_snapshot
+from app.core.observability import get_metrics_prometheus
 from app.db.session import db_ready
 
 router = APIRouter(prefix="/health")
@@ -21,3 +23,8 @@ def readiness() -> dict[str, str]:
 @router.get("/metrics")
 def metrics() -> dict[str, dict[str, float | int]]:
     return get_metrics_snapshot()
+
+
+@router.get("/metrics/prometheus", response_class=PlainTextResponse)
+def metrics_prometheus() -> str:
+    return get_metrics_prometheus()

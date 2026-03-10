@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.schemas.analysis import AnalyzeRequest
 from app.schemas.analysis import InferMetrics
 from app.schemas.analysis import InferResponse
+from app.core.tracing import start_span
 from app.services.inference_pipeline import run_inference_pipeline
 
 router = APIRouter()
@@ -12,7 +13,8 @@ router = APIRouter()
 
 @router.post("/infer", response_model=InferResponse)
 def infer(payload: AnalyzeRequest, db: Session = Depends(get_db)) -> InferResponse:
-    result = run_inference_pipeline(db=db, text=payload.text)
+    with start_span("pipeline.inference", {"nahda.layer": "L9-L11"}):
+        result = run_inference_pipeline(db=db, text=payload.text)
     return InferResponse(
         run_id=result.run_id,
         normalized_text=result.normalized_text,

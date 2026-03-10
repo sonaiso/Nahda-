@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.schemas.analysis import AnalyzeRequest
 from app.schemas.analysis import UnicodeAnalyzeResponse
 from app.schemas.analysis import UnicodeMetrics
+from app.core.tracing import start_span
 from app.services.unicode_pipeline import run_unicode_pipeline
 
 router = APIRouter()
@@ -12,7 +13,8 @@ router = APIRouter()
 
 @router.post("/analyze/unicode", response_model=UnicodeAnalyzeResponse)
 def analyze_unicode(payload: AnalyzeRequest, db: Session = Depends(get_db)) -> UnicodeAnalyzeResponse:
-    result = run_unicode_pipeline(db=db, text=payload.text)
+    with start_span("pipeline.unicode", {"nahda.layer": "L0-L1"}):
+        result = run_unicode_pipeline(db=db, text=payload.text)
     ratio = (result.changed_characters / result.input_length) if result.input_length else 0.0
     return UnicodeAnalyzeResponse(
         run_id=result.run_id,

@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.schemas.analysis import AnalyzeRequest
 from app.schemas.analysis import SemanticsAnalyzeResponse
 from app.schemas.analysis import SemanticsMetrics
+from app.core.tracing import start_span
 from app.services.semantics_pipeline import run_semantics_pipeline
 
 router = APIRouter()
@@ -12,7 +13,8 @@ router = APIRouter()
 
 @router.post("/analyze/semantics", response_model=SemanticsAnalyzeResponse)
 def analyze_semantics(payload: AnalyzeRequest, db: Session = Depends(get_db)) -> SemanticsAnalyzeResponse:
-    result = run_semantics_pipeline(db=db, text=payload.text)
+    with start_span("pipeline.semantics", {"nahda.layer": "L5-L8"}):
+        result = run_semantics_pipeline(db=db, text=payload.text)
     return SemanticsAnalyzeResponse(
         run_id=result.run_id,
         normalized_text=result.normalized_text,

@@ -22,6 +22,7 @@ Public endpoints:
 - `GET /health/live`
 - `GET /health/ready`
 - `GET /health/metrics`
+- `GET /health/metrics/prometheus`
 
 Protected endpoints (Bearer token required):
 
@@ -152,8 +153,16 @@ Rate limiting is enabled by default and configurable through `.env`.
 Observability defaults:
 
 - every response includes `X-Request-ID`
+- every response includes `X-Trace-ID`
 - structured access logs are emitted per request
 - in-memory operational metrics are exposed via `GET /health/metrics`
+- Prometheus-formatted metrics are exposed via `GET /health/metrics/prometheus`
+
+OpenTelemetry tracing:
+
+- request span is created per HTTP call (`http.request`)
+- deep pipeline spans are created in API layers (unicode/morphology/semantics/inference/rule/manat/explain/trace)
+- exporter mode is controlled by `.env`: `NAHDA_OTEL_EXPORTER=none|console|otlp`
 
 Swagger UI:
 
@@ -172,3 +181,23 @@ CI quality gate runs:
 - `bandit -q -r app`
 - `pip-audit`
 - `pytest -q` with coverage fail-under `85%`
+
+## Dashboards And Alerts Baseline
+
+Start stack (API + DB + Prometheus + Grafana + Alertmanager):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up --build
+```
+
+Services:
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (admin/admin)
+- Alertmanager: `http://localhost:9093`
+
+Provisioned assets:
+
+- Prometheus scrape + alert rules: `ops/observability/prometheus.yml`, `ops/observability/alert_rules.yml`
+- Alertmanager baseline config: `ops/observability/alertmanager.yml`
+- Grafana datasource + dashboard provisioning under `ops/observability/grafana/`

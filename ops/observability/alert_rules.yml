@@ -1,0 +1,20 @@
+groups:
+  - name: nahda-baseline-alerts
+    rules:
+      - alert: NahdaHighErrorRate
+        expr: sum(rate(nahda_errors_total[5m])) / clamp_min(sum(rate(nahda_requests_total[5m])), 1) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Nahda error rate above 5%"
+          description: "Error rate has exceeded 5% during the last 5 minutes."
+
+      - alert: NahdaHighLatency
+        expr: avg(nahda_latency_avg_ms) > 600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Nahda latency is high"
+          description: "Average API latency is above 600ms for 10 minutes."
