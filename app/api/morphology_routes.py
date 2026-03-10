@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.schemas.analysis import AnalyzeRequest
 from app.schemas.analysis import MorphologyAnalyzeResponse
 from app.schemas.analysis import MorphologyMetrics
+from app.core.tracing import start_span
 from app.services.morphology_pipeline import run_morphology_pipeline
 
 router = APIRouter()
@@ -12,7 +13,8 @@ router = APIRouter()
 
 @router.post("/analyze/morphology", response_model=MorphologyAnalyzeResponse)
 def analyze_morphology(payload: AnalyzeRequest, db: Session = Depends(get_db)) -> MorphologyAnalyzeResponse:
-    result = run_morphology_pipeline(db=db, text=payload.text)
+    with start_span("pipeline.morphology", {"nahda.layer": "L2-L4"}):
+        result = run_morphology_pipeline(db=db, text=payload.text)
     avg_syllables = (result.syllable_count / result.token_count) if result.token_count else 0.0
     return MorphologyAnalyzeResponse(
         run_id=result.run_id,

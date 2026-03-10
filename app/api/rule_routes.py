@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.schemas.analysis import AnalyzeRequest
 from app.schemas.analysis import RuleEvaluateMetrics
 from app.schemas.analysis import RuleEvaluateResponse
+from app.core.tracing import start_span
 from app.services.rule_pipeline import run_rule_evaluation_pipeline
 
 router = APIRouter()
@@ -12,7 +13,8 @@ router = APIRouter()
 
 @router.post("/rule/evaluate", response_model=RuleEvaluateResponse)
 def rule_evaluate(payload: AnalyzeRequest, db: Session = Depends(get_db)) -> RuleEvaluateResponse:
-    result = run_rule_evaluation_pipeline(db=db, text=payload.text)
+    with start_span("pipeline.rule_evaluate", {"nahda.layer": "L9-L11"}):
+        result = run_rule_evaluation_pipeline(db=db, text=payload.text)
     return RuleEvaluateResponse(
         run_id=result.run_id,
         rules=result.rules,

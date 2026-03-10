@@ -21,6 +21,7 @@ def test_request_id_header_present() -> None:
         response = client.get("/health/live")
         assert response.status_code == 200
         assert response.headers.get("X-Request-ID")
+        assert response.headers.get("X-Trace-ID")
 
 
 def test_metrics_endpoint_collects_requests() -> None:
@@ -31,6 +32,15 @@ def test_metrics_endpoint_collects_requests() -> None:
         payload = metrics_response.json()
         assert "GET /health/live" in payload
         assert payload["GET /health/live"]["requests"] >= 1
+
+
+def test_prometheus_metrics_endpoint() -> None:
+    with TestClient(create_app()) as client:
+        client.get("/health/live")
+        response = client.get("/health/metrics/prometheus")
+        assert response.status_code == 200
+        assert "nahda_requests_total" in response.text
+        assert "nahda_errors_total" in response.text
 
 
 def test_auth_required_for_protected_route() -> None:
