@@ -5,6 +5,7 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 ## Documentation
 
 - [الوثيقة الهندسية الكاملة لمحرك الوعي الفراكتالي العربي](docs/fractal-arabic-engine-spec.md)
+- [خطة إعادة البناء الصارمة - المواصفة التنفيذية الصناعية](docs/strict-rebuild-awareness-engine-spec.md)
 
 ## MVP Scope (L0-L4)
 
