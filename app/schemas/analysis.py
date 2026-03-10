@@ -58,3 +58,52 @@ class MorphologyAnalyzeResponse(BaseModel):
     syllables: list[SyllableOut]
     patterns: list[PatternOut]
     metrics: MorphologyMetrics
+
+
+class LexemeOut(BaseModel):
+    token: str
+    lemma: str
+    pos: str
+    independence: bool
+
+
+class MeaningSenseOut(BaseModel):
+    sense_type: str
+    gloss: str
+    priority_rank: int
+
+
+class MeaningRegistryOut(BaseModel):
+    token: str
+    qareena_required: bool
+    senses: list[MeaningSenseOut]
+
+
+class IndicationOut(BaseModel):
+    token: str
+    mutabaqa: list[str]
+    tadammun: list[str]
+    iltizam: list[str]
+
+
+class RelationOut(BaseModel):
+    relation_type: str
+    source_ref: str
+    target_ref: str
+
+
+class SemanticsMetrics(BaseModel):
+    lexeme_count: int
+    independent_lexeme_ratio: float
+    indication_coverage_ratio: float
+    relation_count: int
+
+
+class SemanticsAnalyzeResponse(BaseModel):
+    run_id: str
+    normalized_text: str
+    lexemes: list[LexemeOut]
+    meaning_registry: list[MeaningRegistryOut]
+    indications: list[IndicationOut]
+    relations: list[RelationOut]
+    metrics: SemanticsMetrics

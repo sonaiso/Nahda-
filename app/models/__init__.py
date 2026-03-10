@@ -2,10 +2,15 @@ from app.models.entities import Document
 from app.models.entities import DocumentSegment
 from app.models.entities import GraphemeUnit
 from app.models.entities import LayerExecution
+from app.models.entities import LexemeUnit
+from app.models.entities import MeaningRegistry
+from app.models.entities import MeaningSense
 from app.models.entities import PatternUnit
 from app.models.entities import PhoneticAtom
 from app.models.entities import PipelineRun
 from app.models.entities import ProcessingError
+from app.models.entities import IndicationUnit
+from app.models.entities import RelationUnit
 from app.models.entities import SyllableUnit
 from app.models.entities import UnicodeScalar
 
@@ -20,4 +25,9 @@ __all__ = [
     "PhoneticAtom",
     "SyllableUnit",
     "PatternUnit",
+    "LexemeUnit",
+    "MeaningRegistry",
+    "MeaningSense",
+    "IndicationUnit",
+    "RelationUnit",
 ]

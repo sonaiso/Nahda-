@@ -132,3 +132,56 @@ class PatternUnit(Base):
     class_type: Mapped[str] = mapped_column(String(16), default="mushtaq")
     augmentations_json: Mapped[list] = mapped_column(JSON, default=list)
     semantic_shift_json: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class LexemeUnit(Base):
+    __tablename__ = "lexeme_units"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    surface_form: Mapped[str] = mapped_column(String(128), index=True)
+    pos: Mapped[str] = mapped_column(String(24), index=True)
+    independence: Mapped[bool] = mapped_column(Boolean, default=True)
+    pattern_id: Mapped[str] = mapped_column(ForeignKey("pattern_units.id", ondelete="CASCADE"), index=True)
+    lemma: Mapped[str] = mapped_column(String(128), index=True)
+
+
+class MeaningRegistry(Base):
+    __tablename__ = "meaning_registries"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    lexeme_id: Mapped[str] = mapped_column(ForeignKey("lexeme_units.id", ondelete="CASCADE"), index=True)
+    qareena_required: Mapped[bool] = mapped_column(Boolean, default=True)
+    notes: Mapped[str] = mapped_column(Text, default="")
+
+
+class MeaningSense(Base):
+    __tablename__ = "meaning_senses"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    registry_id: Mapped[str] = mapped_column(ForeignKey("meaning_registries.id", ondelete="CASCADE"), index=True)
+    sense_type: Mapped[str] = mapped_column(String(24), index=True)
+    gloss: Mapped[str] = mapped_column(String(255))
+    priority_rank: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class IndicationUnit(Base):
+    __tablename__ = "indication_units"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    lexeme_id: Mapped[str] = mapped_column(ForeignKey("lexeme_units.id", ondelete="CASCADE"), index=True)
+    mutabaqa_json: Mapped[list] = mapped_column(JSON, default=list)
+    tadammun_json: Mapped[list] = mapped_column(JSON, default=list)
+    iltizam_json: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class RelationUnit(Base):
+    __tablename__ = "relation_units"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    relation_type: Mapped[str] = mapped_column(String(24), index=True)
+    source_ref: Mapped[str] = mapped_column(String(128), index=True)
+    target_ref: Mapped[str] = mapped_column(String(128), index=True)
