@@ -33,6 +33,7 @@ Protected endpoints (Bearer token required):
 - `POST /infer`
 - `POST /rule/evaluate`
 - `POST /manat/apply`
+- `POST /awareness/apply`
 - `GET /explain/{run_id}`
 - `GET /trace/{run_id}`
 - `POST /v1/analyze/unicode`
@@ -41,6 +42,7 @@ Protected endpoints (Bearer token required):
 - `POST /v1/infer`
 - `POST /v1/rule/evaluate`
 - `POST /v1/manat/apply`
+- `POST /v1/awareness/apply`
 - `GET /v1/explain/{run_id}`
 - `GET /v1/trace/{run_id}`
 
@@ -113,6 +115,8 @@ Phase 3 migration: `migrations/003_inference_core.sql`
 Phase 4 migration: `migrations/004_manat_tanzil_core.sql`
 
 Phase 5 migration: `migrations/005_explainability_observability.sql`
+
+Phase 6 migration: `migrations/006_awareness_layer.sql`
 
 ## Run Locally
 

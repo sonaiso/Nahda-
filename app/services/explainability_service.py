@@ -19,6 +19,11 @@ from app.models.entities import RuleUnit
 from app.models.entities import SpeechUnit
 from app.models.entities import SyllableUnit
 from app.models.entities import UnicodeScalar
+from app.models.entities import ConceptUnit
+from app.models.entities import ScaleAssessment
+from app.models.entities import SpiritSignal
+from app.models.entities import InclinationProfile
+from app.models.entities import WillDecision
 
 
 def _count_by_run(db: Session, model, run_id: str) -> int:
@@ -51,6 +56,11 @@ def get_explain(db: Session, run_id: str) -> dict | None:
         "inferences": _count_by_run(db, InferenceUnit, run_id),
         "rules": _count_by_run(db, RuleUnit, run_id),
         "manat": _count_by_run(db, ManatUnit, run_id),
+        "concepts": _count_by_run(db, ConceptUnit, run_id),
+        "scale_assessments": _count_by_run(db, ScaleAssessment, run_id),
+        "spirit_signals": _count_by_run(db, SpiritSignal, run_id),
+        "inclination_profiles": _count_by_run(db, InclinationProfile, run_id),
+        "will_decisions": _count_by_run(db, WillDecision, run_id),
     }
 
     explain_payload = {

@@ -7,6 +7,7 @@ from app.api import semantics_routes
 from app.api import infer_routes
 from app.api import rule_routes
 from app.api import manat_routes
+from app.api import awareness_routes
 from app.api import explainability_routes
 from app.api import health_routes
 from app.security.auth import get_current_principal
@@ -41,6 +42,11 @@ router.include_router(
 router.include_router(
 	manat_routes.router,
 	tags=["manat"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	awareness_routes.router,
+	tags=["awareness"],
 	dependencies=[Depends(get_current_principal)],
 )
 router.include_router(

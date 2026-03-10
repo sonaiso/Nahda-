@@ -24,6 +24,11 @@ from app.models.entities import TanzilDecision
 from app.models.entities import ApplicabilityCheck
 from app.models.entities import AuditEvent
 from app.models.entities import ExplainabilityTrace
+from app.models.entities import ConceptUnit
+from app.models.entities import ScaleAssessment
+from app.models.entities import SpiritSignal
+from app.models.entities import InclinationProfile
+from app.models.entities import WillDecision
 from app.models.entities import SyllableUnit
 from app.models.entities import UnicodeScalar
 
@@ -56,4 +61,9 @@ __all__ = [
     "ApplicabilityCheck",
     "AuditEvent",
     "ExplainabilityTrace",
+    "ConceptUnit",
+    "ScaleAssessment",
+    "SpiritSignal",
+    "InclinationProfile",
+    "WillDecision",
 ]

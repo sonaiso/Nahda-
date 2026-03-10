@@ -191,6 +191,33 @@ def test_explain_and_trace_endpoints() -> None:
         assert len(trace_data["events"]) >= 1
 
 
+def test_awareness_apply_endpoint() -> None:
+    payload = {
+        "text": "لا كتاب في البيت",
+        "external_case_id": "case-awareness-001",
+        "description": "awareness pipeline check",
+        "case_features": [
+            {
+                "feature_key": "كتاب",
+                "feature_value": "present",
+                "verification_state": "verified",
+            }
+        ],
+    }
+    with TestClient(create_app()) as client:
+        headers = get_auth_headers(client)
+        apply_response = client.post("/manat/apply", json=payload, headers=headers)
+        assert apply_response.status_code == 200
+        run_id = apply_response.json()["run_id"]
+
+        awareness_response = client.post("/awareness/apply", json={"run_id": run_id}, headers=headers)
+        assert awareness_response.status_code == 200
+        data = awareness_response.json()
+        assert data["run_id"] == run_id
+        assert data["will"]["action"] in {"do", "avoid", "suspend"}
+        assert data["metrics"]["manat_total"] >= 1
+
+
 def test_rate_limit_on_protected_routes() -> None:
     original_limit = settings.rate_limit_requests_per_window
     original_window = settings.rate_limit_window_seconds

@@ -245,6 +245,11 @@ class ExplainSummaryOut(BaseModel):
     inferences: int
     rules: int
     manat: int
+    concepts: int
+    scale_assessments: int
+    spirit_signals: int
+    inclination_profiles: int
+    will_decisions: int
 
 
 class ExplainResponse(BaseModel):
@@ -263,3 +268,54 @@ class TraceEventOut(BaseModel):
 class TraceResponse(BaseModel):
     run_id: str
     events: list[TraceEventOut]
+
+
+class AwarenessApplyRequest(BaseModel):
+    run_id: str = Field(min_length=1, max_length=64)
+
+
+class ConceptOut(BaseModel):
+    concept_key: str
+    summary: str
+    confidence_score: float
+
+
+class ScaleOut(BaseModel):
+    scale_name: str
+    value_score: float
+    rationale: str
+
+
+class SpiritOut(BaseModel):
+    alignment_score: float
+    remembrance_level: str
+    rationale: str
+
+
+class InclinationOut(BaseModel):
+    tendency: str
+    intensity_score: float
+    rationale: str
+
+
+class WillOut(BaseModel):
+    action: str
+    confidence_score: float
+    rationale: str
+
+
+class AwarenessMetrics(BaseModel):
+    manat_total: int
+    applies_true: int
+    applies_false: int
+    suspend_count: int
+
+
+class AwarenessApplyResponse(BaseModel):
+    run_id: str
+    concept: ConceptOut
+    scale: ScaleOut
+    spirit: SpiritOut
+    inclination: InclinationOut
+    will: WillOut
+    metrics: AwarenessMetrics
