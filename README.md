@@ -16,6 +16,14 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 
 ## API Endpoints
 
+Public endpoints:
+
+- `POST /auth/token`
+- `GET /health/live`
+- `GET /health/ready`
+
+Protected endpoints (Bearer token required):
+
 - `POST /analyze/unicode`
 - `POST /analyze/morphology`
 - `POST /analyze/semantics`
@@ -32,6 +40,18 @@ MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي
 - `POST /v1/manat/apply`
 - `GET /v1/explain/{run_id}`
 - `GET /v1/trace/{run_id}`
+
+### Auth Token Request
+
+```json
+{
+	"subject": "dev-user",
+	"role": "service",
+	"bootstrap_key": "local-dev-bootstrap-key"
+}
+```
+
+Use token as `Authorization: Bearer <access_token>`.
 
 ### Request Body
 
@@ -125,6 +145,8 @@ Health endpoints:
 - `GET /health/live`
 - `GET /health/ready`
 
+Rate limiting is enabled by default and configurable through `.env`.
+
 Swagger UI:
 
 - `http://localhost:8000/docs`
@@ -139,4 +161,6 @@ CI quality gate runs:
 
 - `ruff check .`
 - `mypy`
+- `bandit -q -r app`
+- `pip-audit`
 - `pytest -q` with coverage fail-under `85%`

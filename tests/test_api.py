@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.main import create_app
+from tests.auth_helpers import get_auth_headers
 
 
 def test_health_endpoints() -> None:
@@ -14,10 +16,17 @@ def test_health_endpoints() -> None:
         assert ready_response.json()["status"] == "ready"
 
 
+def test_auth_required_for_protected_route() -> None:
+    with TestClient(create_app()) as client:
+        response = client.post("/analyze/unicode", json={"text": "كتاب"})
+        assert response.status_code == 401
+
+
 def test_unicode_endpoint() -> None:
     payload = {"text": "إِنَّ الكِتَاب"}
     with TestClient(create_app()) as client:
-        response = client.post("/analyze/unicode", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/analyze/unicode", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -30,7 +39,8 @@ def test_unicode_endpoint() -> None:
 def test_morphology_endpoint() -> None:
     payload = {"text": "مكتوبات وكتاب"}
     with TestClient(create_app()) as client:
-        response = client.post("/analyze/morphology", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/analyze/morphology", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -42,7 +52,8 @@ def test_morphology_endpoint() -> None:
 def test_semantics_endpoint() -> None:
     payload = {"text": "الكتاب في البيت"}
     with TestClient(create_app()) as client:
-        response = client.post("/analyze/semantics", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/analyze/semantics", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -55,7 +66,8 @@ def test_semantics_endpoint() -> None:
 def test_infer_endpoint() -> None:
     payload = {"text": "إن الكتاب في البيت"}
     with TestClient(create_app()) as client:
-        response = client.post("/infer", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/infer", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -67,7 +79,8 @@ def test_infer_endpoint() -> None:
 def test_rule_evaluate_endpoint() -> None:
     payload = {"text": "لا كتاب في البيت"}
     with TestClient(create_app()) as client:
-        response = client.post("/rule/evaluate", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/rule/evaluate", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -90,7 +103,8 @@ def test_manat_apply_endpoint_true_or_false() -> None:
         ],
     }
     with TestClient(create_app()) as client:
-        response = client.post("/manat/apply", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/manat/apply", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -107,7 +121,8 @@ def test_manat_apply_endpoint_suspend_on_missing_feature() -> None:
         "case_features": [],
     }
     with TestClient(create_app()) as client:
-        response = client.post("/manat/apply", json=payload)
+        headers = get_auth_headers(client)
+        response = client.post("/manat/apply", json=payload, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -129,20 +144,41 @@ def test_explain_and_trace_endpoints() -> None:
         ],
     }
     with TestClient(create_app()) as client:
-        apply_response = client.post("/manat/apply", json=payload)
+        headers = get_auth_headers(client)
+        apply_response = client.post("/manat/apply", json=payload, headers=headers)
         assert apply_response.status_code == 200
         run_id = apply_response.json()["run_id"]
 
-        explain_response = client.get(f"/explain/{run_id}")
+        explain_response = client.get(f"/explain/{run_id}", headers=headers)
         assert explain_response.status_code == 200
         explain_data = explain_response.json()
         assert explain_data["run_id"] == run_id
         assert "summary" in explain_data
         assert explain_data["summary"]["rules"] >= 1
 
-        trace_response = client.get(f"/trace/{run_id}")
+        trace_response = client.get(f"/trace/{run_id}", headers=headers)
         assert trace_response.status_code == 200
         trace_data = trace_response.json()
         assert trace_data["run_id"] == run_id
         assert isinstance(trace_data["events"], list)
         assert len(trace_data["events"]) >= 1
+
+
+def test_rate_limit_on_protected_routes() -> None:
+    original_limit = settings.rate_limit_requests_per_window
+    original_window = settings.rate_limit_window_seconds
+
+    settings.rate_limit_requests_per_window = 3
+    settings.rate_limit_window_seconds = 60
+    try:
+        with TestClient(create_app()) as client:
+            headers = get_auth_headers(client)
+            first = client.post("/analyze/unicode", json={"text": "كتاب"}, headers=headers)
+            second = client.post("/analyze/morphology", json={"text": "كتاب"}, headers=headers)
+            third = client.post("/analyze/semantics", json={"text": "كتاب"}, headers=headers)
+            assert first.status_code == 200
+            assert second.status_code == 200
+            assert third.status_code == 429
+    finally:
+        settings.rate_limit_requests_per_window = original_limit
+        settings.rate_limit_window_seconds = original_window
