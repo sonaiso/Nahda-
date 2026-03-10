@@ -60,6 +60,11 @@ def test_e2e_full_flow_default_routes() -> None:
         explain_data = explain_res.json()
         assert explain_data["summary"]["manat"] >= 1
 
+        awareness_res = client.post("/awareness/apply", json={"run_id": run_id}, headers=headers)
+        assert awareness_res.status_code == 200
+        awareness_data = awareness_res.json()
+        assert awareness_data["will"]["action"] in {"do", "avoid", "suspend"}
+
         trace_res = client.get(f"/trace/{run_id}", headers=headers)
         assert trace_res.status_code == 200
         trace_data = trace_res.json()
@@ -92,3 +97,4 @@ def test_e2e_v1_routes() -> None:
 
         assert client.get(f"/v1/explain/{run_id}", headers=headers).status_code == 200
         assert client.get(f"/v1/trace/{run_id}", headers=headers).status_code == 200
+        assert client.post("/v1/awareness/apply", json={"run_id": run_id}, headers=headers).status_code == 200

@@ -332,3 +332,74 @@ class ExplainabilityTrace(Base):
     run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
     trace_json: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ConceptUnit(Base):
+    __tablename__ = "concept_units"
+    __table_args__ = (
+        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="ck_concept_confidence"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    concept_key: Mapped[str] = mapped_column(String(128), index=True)
+    summary: Mapped[str] = mapped_column(Text)
+    confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ScaleAssessment(Base):
+    __tablename__ = "scale_assessments"
+    __table_args__ = (
+        CheckConstraint("value_score >= 0 AND value_score <= 1", name="ck_scale_value"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    scale_name: Mapped[str] = mapped_column(String(64), default="sharia_value")
+    value_score: Mapped[float] = mapped_column(Float, default=0.5)
+    rationale: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SpiritSignal(Base):
+    __tablename__ = "spirit_signals"
+    __table_args__ = (
+        CheckConstraint("alignment_score >= 0 AND alignment_score <= 1", name="ck_spirit_alignment"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    alignment_score: Mapped[float] = mapped_column(Float, default=0.5)
+    remembrance_level: Mapped[str] = mapped_column(String(24), default="moderate")
+    rationale: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class InclinationProfile(Base):
+    __tablename__ = "inclination_profiles"
+    __table_args__ = (
+        CheckConstraint("intensity_score >= 0 AND intensity_score <= 1", name="ck_inclination_intensity"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    tendency: Mapped[str] = mapped_column(String(24), default="suspend")
+    intensity_score: Mapped[float] = mapped_column(Float, default=0.5)
+    rationale: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class WillDecision(Base):
+    __tablename__ = "will_decisions"
+    __table_args__ = (
+        CheckConstraint("action IN ('do','avoid','suspend')", name="ck_will_action"),
+        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="ck_will_confidence"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    action: Mapped[str] = mapped_column(String(16), default="suspend")
+    rationale: Mapped[str] = mapped_column(Text)
+    confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
