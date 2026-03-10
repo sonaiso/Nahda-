@@ -171,3 +171,54 @@ class RuleEvaluateResponse(BaseModel):
     conflicts: list[ConflictOut]
     tarjih_decisions: list[TarjihOut]
     metrics: RuleEvaluateMetrics
+
+
+class CaseFeatureIn(BaseModel):
+    feature_key: str
+    feature_value: str
+    verification_state: str = "verified"
+
+
+class ManatApplyRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=20000)
+    external_case_id: str | None = None
+    description: str = ""
+    case_features: list[CaseFeatureIn] = Field(default_factory=list)
+
+    @field_validator("text")
+    @classmethod
+    def ensure_text_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("text must not be empty")
+        return value
+
+
+class ManatItemOut(BaseModel):
+    rule_ref: str
+    hukm_text: str
+    verified_features: list[str]
+    missing_features: list[str]
+    applies_state: str
+    confidence_score: float
+    rationale: str
+
+
+class TanzilDecisionOut(BaseModel):
+    manat_ref: str
+    final_decision: str
+    rationale: str
+
+
+class ManatApplyMetrics(BaseModel):
+    rule_evaluated_count: int
+    applies_true_count: int
+    applies_false_count: int
+    suspend_count: int
+
+
+class ManatApplyResponse(BaseModel):
+    run_id: str
+    case_id: str
+    manat: list[ManatItemOut]
+    tanzil_decisions: list[TanzilDecisionOut]
+    metrics: ManatApplyMetrics

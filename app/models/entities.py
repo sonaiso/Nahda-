@@ -257,3 +257,59 @@ class TarjihDecision(Base):
     winning_rule_id: Mapped[str] = mapped_column(ForeignKey("rule_units.id", ondelete="CASCADE"), index=True)
     basis: Mapped[str] = mapped_column(String(64), default="strength_of_evidence")
     discarded_rule_ids_json: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class CaseProfile(Base):
+    __tablename__ = "case_profiles"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    external_case_id: Mapped[str] = mapped_column(String(128), default="")
+    description: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class CaseFeature(Base):
+    __tablename__ = "case_features"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    case_id: Mapped[str] = mapped_column(ForeignKey("case_profiles.id", ondelete="CASCADE"), index=True)
+    feature_key: Mapped[str] = mapped_column(String(128), index=True)
+    feature_value: Mapped[str] = mapped_column(String(128))
+    verification_state: Mapped[str] = mapped_column(String(32), default="verified")
+
+
+class ManatUnit(Base):
+    __tablename__ = "manat_units"
+    __table_args__ = (
+        CheckConstraint("applies_state IN ('true','false','suspend')", name="ck_manat_applies_state"),
+        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="ck_manat_confidence"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    rule_id: Mapped[str] = mapped_column(ForeignKey("rule_units.id", ondelete="CASCADE"), index=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("case_profiles.id", ondelete="CASCADE"), index=True)
+    verified_features_json: Mapped[list] = mapped_column(JSON, default=list)
+    missing_features_json: Mapped[list] = mapped_column(JSON, default=list)
+    applies_state: Mapped[str] = mapped_column(String(16), default="suspend")
+    confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
+
+
+class TanzilDecision(Base):
+    __tablename__ = "tanzil_decisions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    manat_id: Mapped[str] = mapped_column(ForeignKey("manat_units.id", ondelete="CASCADE"), index=True)
+    final_decision: Mapped[str] = mapped_column(String(16), index=True)
+    rationale: Mapped[str] = mapped_column(Text)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ApplicabilityCheck(Base):
+    __tablename__ = "applicability_checks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    manat_id: Mapped[str] = mapped_column(ForeignKey("manat_units.id", ondelete="CASCADE"), index=True)
+    check_type: Mapped[str] = mapped_column(String(64), index=True)
+    passed: Mapped[bool] = mapped_column(Boolean, default=False)
+    details_json: Mapped[dict] = mapped_column(JSON, default=dict)

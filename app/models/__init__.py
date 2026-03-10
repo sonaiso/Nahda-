@@ -17,6 +17,11 @@ from app.models.entities import InferenceMafhumItem
 from app.models.entities import RuleUnit
 from app.models.entities import RuleConflict
 from app.models.entities import TarjihDecision
+from app.models.entities import CaseProfile
+from app.models.entities import CaseFeature
+from app.models.entities import ManatUnit
+from app.models.entities import TanzilDecision
+from app.models.entities import ApplicabilityCheck
 from app.models.entities import SyllableUnit
 from app.models.entities import UnicodeScalar
 
@@ -42,4 +47,9 @@ __all__ = [
     "RuleUnit",
     "RuleConflict",
     "TarjihDecision",
+    "CaseProfile",
+    "CaseFeature",
+    "ManatUnit",
+    "TanzilDecision",
+    "ApplicabilityCheck",
 ]
