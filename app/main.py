@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.routes import router
+from app.core.config import validate_production_settings
 from app.core.observability import ObservabilityMiddleware
 from app.core.observability import reset_metrics
 from app.core.rate_limiter import RateLimitMiddleware
@@ -12,6 +13,7 @@ from app.db.session import init_db
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    validate_production_settings()
     setup_tracing()
     init_db()
     reset_metrics()

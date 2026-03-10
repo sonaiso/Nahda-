@@ -18,6 +18,10 @@ services:
     image: prom/alertmanager:v0.27.0
     command:
       - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--config.expand-env=true"
+    environment:
+      NAHDA_ALERT_WEBHOOK_URL: ${NAHDA_ALERT_WEBHOOK_URL:-http://localhost:5001/alerts}
+      NAHDA_ALERT_SLACK_WEBHOOK_URL: ${NAHDA_ALERT_SLACK_WEBHOOK_URL:-http://localhost:5001/slack}
     volumes:
       - ./ops/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
     ports:
