@@ -16,6 +16,23 @@ def test_health_endpoints() -> None:
         assert ready_response.json()["status"] == "ready"
 
 
+def test_request_id_header_present() -> None:
+    with TestClient(create_app()) as client:
+        response = client.get("/health/live")
+        assert response.status_code == 200
+        assert response.headers.get("X-Request-ID")
+
+
+def test_metrics_endpoint_collects_requests() -> None:
+    with TestClient(create_app()) as client:
+        client.get("/health/live")
+        metrics_response = client.get("/health/metrics")
+        assert metrics_response.status_code == 200
+        payload = metrics_response.json()
+        assert "GET /health/live" in payload
+        assert payload["GET /health/live"]["requests"] >= 1
+
+
 def test_auth_required_for_protected_route() -> None:
     with TestClient(create_app()) as client:
         response = client.post("/analyze/unicode", json={"text": "كتاب"})
