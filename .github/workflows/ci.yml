@@ -65,6 +65,14 @@ jobs:
         run: |
           mypy
 
+      - name: Run Bandit (SAST)
+        run: |
+          bandit -q -r app
+
+      - name: Run pip-audit (dependency vulnerabilities)
+        run: |
+          pip-audit -r requirements/security-audit.txt
+
       - name: Run tests with coverage gate
         run: |
           pytest -q

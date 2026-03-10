@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.routes import router
+from app.core.rate_limiter import RateLimitMiddleware
 from app.db.session import init_db
 
 
@@ -19,6 +20,7 @@ def create_app() -> FastAPI:
         description="MVP implementation of L0-L4 analysis pipeline.",
         lifespan=lifespan,
     )
+    app.add_middleware(RateLimitMiddleware)
     app.include_router(router)
     app.include_router(router, prefix="/v1")
 

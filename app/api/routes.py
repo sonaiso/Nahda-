@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.api import auth_routes
 from app.api import unicode_routes
 from app.api import morphology_routes
 from app.api import semantics_routes
@@ -8,13 +9,43 @@ from app.api import rule_routes
 from app.api import manat_routes
 from app.api import explainability_routes
 from app.api import health_routes
+from app.security.auth import get_current_principal
 
 router = APIRouter()
-router.include_router(unicode_routes.router, tags=["unicode"])
-router.include_router(morphology_routes.router, tags=["morphology"])
-router.include_router(semantics_routes.router, tags=["semantics"])
-router.include_router(infer_routes.router, tags=["inference"])
-router.include_router(rule_routes.router, tags=["rule"])
-router.include_router(manat_routes.router, tags=["manat"])
-router.include_router(explainability_routes.router, tags=["explainability"])
+router.include_router(auth_routes.router, tags=["auth"])
+router.include_router(
+	unicode_routes.router,
+	tags=["unicode"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	morphology_routes.router,
+	tags=["morphology"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	semantics_routes.router,
+	tags=["semantics"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	infer_routes.router,
+	tags=["inference"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	rule_routes.router,
+	tags=["rule"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	manat_routes.router,
+	tags=["manat"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	explainability_routes.router,
+	tags=["explainability"],
+	dependencies=[Depends(get_current_principal)],
+)
 router.include_router(health_routes.router, tags=["health"])
