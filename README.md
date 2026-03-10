@@ -131,6 +131,11 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 The app will use `NAHDA_DATABASE_URL` from `.env`.
 
+Production profile template:
+
+- `.env.production.example`
+- `docs/production-secrets-profile.md`
+
 ## Run With Docker Compose
 
 ```bash
@@ -164,6 +169,11 @@ OpenTelemetry tracing:
 - deep pipeline spans are created in API layers (unicode/morphology/semantics/inference/rule/manat/explain/trace)
 - exporter mode is controlled by `.env`: `NAHDA_OTEL_EXPORTER=none|console|otlp`
 
+OTLP collector profile:
+
+- `docker-compose.otlp.yml`
+- `ops/observability/otel-collector.yml`
+
 Swagger UI:
 
 - `http://localhost:8000/docs`
@@ -190,14 +200,34 @@ Start stack (API + DB + Prometheus + Grafana + Alertmanager):
 docker compose -f docker-compose.yml -f docker-compose.observability.yml up --build
 ```
 
+Start stack with OTLP collector + Jaeger:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml -f docker-compose.otlp.yml up --build
+```
+
 Services:
 
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` (admin/admin)
 - Alertmanager: `http://localhost:9093`
+- Jaeger UI (with OTLP profile): `http://localhost:16686`
 
 Provisioned assets:
 
 - Prometheus scrape + alert rules: `ops/observability/prometheus.yml`, `ops/observability/alert_rules.yml`
 - Alertmanager baseline config: `ops/observability/alertmanager.yml`
 - Grafana datasource + dashboard provisioning under `ops/observability/grafana/`
+
+## Enterprise Governance
+
+Branch protection policy and automation:
+
+- `ops/github/branch_protection.md`
+- `ops/github/apply_branch_protection.sh`
+
+Apply policy (example):
+
+```bash
+bash ops/github/apply_branch_protection.sh sonaiso Nahda- main
+```
