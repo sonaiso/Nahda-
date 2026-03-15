@@ -10,6 +10,7 @@ from app.api import manat_routes
 from app.api import awareness_routes
 from app.api import explainability_routes
 from app.api import health_routes
+from app.api import graph_routes
 from app.security.auth import get_current_principal
 
 router = APIRouter()
@@ -55,3 +56,8 @@ router.include_router(
 	dependencies=[Depends(get_current_principal)],
 )
 router.include_router(health_routes.router, tags=["health"])
+router.include_router(
+	graph_routes.router,
+	tags=["graph"],
+	dependencies=[Depends(get_current_principal)],
+)
