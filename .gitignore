@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Testing
+.pytest_cache/
+
+# SQLite dev DB
+*.db
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

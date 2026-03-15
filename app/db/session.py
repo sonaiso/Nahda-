@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.models.base import Base
 from app import models  # noqa: F401
+import app.graph.models  # noqa: F401  – registers graph nodes with Base.metadata
 
 
 def _build_engine():
