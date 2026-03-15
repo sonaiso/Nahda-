@@ -765,7 +765,7 @@ TEMPLATES: list[_T] = [
         "كُتُب",
     ),
     _tmpl(
-        "n_jama3_taksir_fi3al",
+        "n_jama3_taksir_fi3al_plural",
         "فِعَال",
         "F,A,L",
         "triliteral",

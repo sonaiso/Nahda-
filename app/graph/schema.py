@@ -337,12 +337,6 @@ LABELS: list[dict[str, Any]] = [
         },
         "constraints": [{"type": "UNIQUE", "property": "op_id"}],
     },
-    {
-        "label": "RootClass",
-        "layer": "core",
-        "properties": {"class_name": "string", "description": "string"},
-        "constraints": [{"type": "UNIQUE", "property": "class_name"}],
-    },
 ]
 
 # ---------------------------------------------------------------------------
