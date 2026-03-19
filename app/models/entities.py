@@ -403,3 +403,65 @@ class WillDecision(Base):
     rationale: Mapped[str] = mapped_column(Text)
     confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+# ---------------------------------------------------------------------------
+# Qiyas — Analogical Reasoning Layer
+# ---------------------------------------------------------------------------
+
+
+class QiyasUnit(Base):
+    """Represents a single Qiyas (analogy) transfer from a source (Asl) to a
+    target (Far) via an effective cause (Illa).
+
+    ``daal_type`` uses the canonical ``DaalType`` vocabulary—never the
+    ambiguous aliases ``DaalForm`` or ``DaalFunction`` that must not appear
+    in code or documentation.
+    """
+
+    __tablename__ = "qiyas_units"
+    __table_args__ = (
+        CheckConstraint(
+            "daal_type IN ('mutabaqa','tadammun','iltizam','nass','zahir','mafhum')",
+            name="ck_qiyas_daal_type",
+        ),
+        CheckConstraint(
+            "transfer_state IN ('valid','invalid','suspend')",
+            name="ck_qiyas_transfer_state",
+        ),
+        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="ck_qiyas_confidence"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    # Source case with known judgment
+    asl_text: Mapped[str] = mapped_column(Text)
+    asl_judgment: Mapped[str] = mapped_column(String(128))
+    # Target case seeking judgment
+    far_text: Mapped[str] = mapped_column(Text)
+    # Effective cause linking Asl to Far
+    illa_description: Mapped[str] = mapped_column(Text)
+    # Indication type — canonical DaalType vocabulary
+    daal_type: Mapped[str] = mapped_column(String(32), default="mutabaqa")
+    # Transferred judgment and outcome
+    transferred_judgment: Mapped[str] = mapped_column(String(128), default="")
+    transfer_state: Mapped[str] = mapped_column(String(16), default="suspend")
+    rationale: Mapped[str] = mapped_column(Text, default="")
+    confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class QiyasDaalLink(Base):
+    """Records the evidence chain that supports the Daal (indication) used in
+    a Qiyas transfer.  Each link attaches one piece of textual or logical
+    evidence to a ``QiyasUnit``.
+    """
+
+    __tablename__ = "qiyas_daal_links"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    qiyas_id: Mapped[str] = mapped_column(ForeignKey("qiyas_units.id", ondelete="CASCADE"), index=True)
+    evidence_text: Mapped[str] = mapped_column(Text)
+    evidence_source: Mapped[str] = mapped_column(String(128), default="nass")
+    strength: Mapped[str] = mapped_column(String(16), default="zanni")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
