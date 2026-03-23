@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api import auth_routes
+from app.api import bidirectional_routes
 from app.api import unicode_routes
 from app.api import morphology_routes
 from app.api import semantics_routes
@@ -59,5 +60,10 @@ router.include_router(health_routes.router, tags=["health"])
 router.include_router(
 	graph_routes.router,
 	tags=["graph"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	bidirectional_routes.router,
+	tags=["bidirectional"],
 	dependencies=[Depends(get_current_principal)],
 )
