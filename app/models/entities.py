@@ -403,3 +403,38 @@ class WillDecision(Base):
     rationale: Mapped[str] = mapped_column(Text)
     confidence_score: Mapped[float] = mapped_column(Float, default=0.5)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class GenerationRun(Base):
+    """Tracks a backward generation run: MeaningStructure → Arabic text."""
+
+    __tablename__ = "generation_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(ForeignKey("pipeline_runs.id", ondelete="CASCADE"), index=True)
+    target_meaning: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="completed", index=True)
+    branch_count: Mapped[int] = mapped_column(Integer, default=0)
+    top_score: Mapped[float] = mapped_column(Float, default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class GenerationBranch(Base):
+    """One candidate generated text branch from a backward generation run."""
+
+    __tablename__ = "generation_branches"
+    __table_args__ = (
+        CheckConstraint("score >= 0 AND score <= 1", name="ck_gen_branch_score"),
+        CheckConstraint("rank >= 1", name="ck_gen_branch_rank"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    generation_run_id: Mapped[str] = mapped_column(
+        ForeignKey("generation_runs.id", ondelete="CASCADE"), index=True
+    )
+    text: Mapped[str] = mapped_column(Text)
+    score: Mapped[float] = mapped_column(Float, default=0.0)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    trace_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    rank: Mapped[int] = mapped_column(Integer, default=1, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

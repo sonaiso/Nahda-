@@ -9,6 +9,7 @@ from app.api import rule_routes
 from app.api import manat_routes
 from app.api import awareness_routes
 from app.api import explainability_routes
+from app.api import generate_routes
 from app.api import health_routes
 from app.api import graph_routes
 from app.security.auth import get_current_principal
@@ -53,6 +54,11 @@ router.include_router(
 router.include_router(
 	explainability_routes.router,
 	tags=["explainability"],
+	dependencies=[Depends(get_current_principal)],
+)
+router.include_router(
+	generate_routes.router,
+	tags=["generate"],
 	dependencies=[Depends(get_current_principal)],
 )
 router.include_router(health_routes.router, tags=["health"])

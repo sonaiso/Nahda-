@@ -319,3 +319,35 @@ class AwarenessApplyResponse(BaseModel):
     inclination: InclinationOut
     will: WillOut
     metrics: AwarenessMetrics
+
+
+class GenerateRequest(BaseModel):
+    meaning: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("meaning")
+    @classmethod
+    def ensure_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("meaning must not be empty")
+        return value
+
+
+class GenerationBranchOut(BaseModel):
+    text: str
+    score: float
+    verified: bool
+    rank: int
+
+
+class GenerateMetrics(BaseModel):
+    branch_count: int
+    verified_count: int
+    top_score: float
+
+
+class GenerateBackwardResponse(BaseModel):
+    run_id: str
+    target_meaning: str
+    top_text: str
+    branches: list[GenerationBranchOut]
+    metrics: GenerateMetrics
