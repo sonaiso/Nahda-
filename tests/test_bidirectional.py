@@ -142,6 +142,8 @@ def test_meaning_consistency_gate_fails_empty():
 def test_build_unicode_atoms_arabic():
     atoms = _build_unicode_atoms("كتاب")
     assert len(atoms) == 4
+    # Unicode category 'Lo' (Letter, other) is the expected category for
+    # basic Arabic letters in the range U+0621–U+064A.
     assert all(a.category == "Lo" for a in atoms)
 
 

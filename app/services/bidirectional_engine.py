@@ -32,6 +32,10 @@ _SHADDA = "\u0651"
 _ARABIC_LETTER_START = 0x0621
 _ARABIC_LETTER_END = 0x064A
 _AL = "ال"
+_MIN_RADICALS = 2
+
+_ARABIC_PARTICLES = frozenset({"في", "من", "الى", "على", "عن", "و", "ف", "ب", "ك", "ل", "ثم", "او"})
+_VERB_PREFIXES = ("ي", "ت", "ن", "ا")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Proof trace (records gate decisions)
@@ -271,9 +275,9 @@ def _license_gate(unit: FunctionalUnit, trace: ProofTrace) -> bool:
 
 def _template_fill_gate(root: RootKernel, pattern: PatternTemplate, trace: ProofTrace) -> bool:
     """Principle of composition: root radicals must satisfy the pattern's radical slots."""
-    if len(root.radicals) < 2:
+    if len(root.radicals) < _MIN_RADICALS:
         trace.contradictions.append(
-            "TemplateFillGate: root has fewer than 2 radicals — cannot fill pattern"
+            f"TemplateFillGate: root has fewer than {_MIN_RADICALS} radicals — cannot fill pattern"
         )
         trace.score *= 0.5
         return False
@@ -542,14 +546,12 @@ def _infer_root_and_pattern(ils: IntraLexemeStructure, ils_id: int, trace: Proof
 def _build_lexeme(ils: IntraLexemeStructure, root: RootKernel, pattern: PatternTemplate, lex_id: int, trace: ProofTrace) -> LexemeNode:
     surface = ils.surface_form
     pos = "particle"
-    particles = {"في", "من", "الى", "على", "عن", "و", "ف", "ب", "ك", "ل", "ثم", "او"}
-    verb_prefixes = ("ي", "ت", "ن", "ا")
 
-    if surface in particles:
+    if surface in _ARABIC_PARTICLES:
         pos = "particle"
     elif surface.startswith(_AL):
         pos = "noun"
-    elif len(surface) >= 3 and surface[0] in verb_prefixes:
+    elif len(surface) >= 3 and surface[0] in _VERB_PREFIXES:
         pos = "verb"
     else:
         pos = "noun"
@@ -590,7 +592,7 @@ def _build_construction_network(lexemes: list[LexemeNode], cn_id: int, trace: Pr
         case_values[nouns[0].id] = "nominative"
 
     # Restriction: particle → subsequent noun
-    for _i, part in enumerate(particles):
+    for part in particles:
         for n in nouns[1:]:
             restr_rels.append(ConstructionRelation("restriction", part.id, n.id))
             case_values[n.id] = "genitive"
