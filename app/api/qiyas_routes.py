@@ -73,6 +73,6 @@ def qiyas_transfer(payload: QiyasRequest, db: Session = Depends(get_db)) -> Qiya
             valid_count=result.valid_count,
             invalid_count=result.invalid_count,
             suspend_count=result.suspend_count,
-            avg_confidence=result.avg_confidence,
+            avg_confidence=round(result.avg_confidence, 4) if result.avg_confidence is not None else None,
         ),
     )
