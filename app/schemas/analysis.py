@@ -319,3 +319,76 @@ class AwarenessApplyResponse(BaseModel):
     inclination: InclinationOut
     will: WillOut
     metrics: AwarenessMetrics
+
+
+# ---------------------------------------------------------------------------
+# Qiyas Schemas
+# ---------------------------------------------------------------------------
+
+
+class QiyasEvidenceIn(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+    source: str = Field(default="nass", max_length=64)
+    strength: str = Field(default="zanni", max_length=16)
+
+
+class QiyasTransferIn(BaseModel):
+    asl_text: str = Field(min_length=1, max_length=2000)
+    # Allow empty strings so the pipeline can return transfer_state="suspend"
+    # instead of rejecting the request with 422.
+    asl_judgment: str = Field(max_length=128, default="")
+    far_text: str = Field(min_length=1, max_length=2000)
+    illa_description: str = Field(max_length=1000, default="")
+    daal_type: str = Field(default="mutabaqa", max_length=32)
+    evidence: list[QiyasEvidenceIn] = Field(default_factory=list)
+
+
+class QiyasRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=20000)
+    transfers: list[QiyasTransferIn] = Field(min_length=1)
+    # Optional: anchor transfers to an already-executed run instead of
+    # creating a new one.  When provided, the pipeline skips the inference
+    # step and attaches Qiyas rows to the existing PipelineRun.
+    run_id: str | None = Field(default=None, max_length=64)
+
+    @field_validator("text")
+    @classmethod
+    def ensure_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("text must not be empty")
+        return value
+
+
+class QiyasDaalLinkOut(BaseModel):
+    evidence_text: str
+    evidence_source: str
+    strength: str
+
+
+class QiyasTransferOut(BaseModel):
+    qiyas_id: str
+    asl_text: str
+    asl_judgment: str
+    far_text: str
+    illa_description: str
+    daal_type: str
+    transferred_judgment: str
+    transfer_state: str
+    rationale: str
+    confidence_score: float
+    daal_links: list[QiyasDaalLinkOut]
+
+
+class QiyasMetrics(BaseModel):
+    transfer_count: int
+    valid_count: int
+    invalid_count: int
+    suspend_count: int
+    avg_confidence: float
+
+
+class QiyasResponse(BaseModel):
+    run_id: str
+    normalized_text: str
+    transfers: list[QiyasTransferOut]
+    metrics: QiyasMetrics

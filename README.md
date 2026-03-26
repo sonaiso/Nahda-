@@ -1,19 +1,87 @@
 # Nahda-
 
-MVP صناعي لتنفيذ المرحلة الأولى من محرك الوعي الفراكتالي العربي (L0-L4) مع API جاهز للتشغيل.
+محرك عربي متعدد الطبقات لتحويل المنطوق إلى بنية مغلقة قابلة للتحقق، ثم إلى استدلال منضبط وقرار قابل للتفسير الكامل.
+
+> **Nahda** is a rule-grounded, explainable Arabic linguistic reasoning framework that models
+> utterance closure, claim validation, formal analogy (Qiyas), and fractal awareness across
+> twenty layered linguistic and conceptual representations — every step fully traceable.
 
 ## Documentation
 
+- [**Architecture Narrative** — رحلة النص الكاملة + مصطلحات + مثال end-to-end](docs/architecture-narrative.md)
 - [الوثيقة الهندسية الكاملة لمحرك الوعي الفراكتالي العربي](docs/fractal-arabic-engine-spec.md)
 - [خطة إعادة البناء الصارمة - المواصفة التنفيذية الصناعية](docs/strict-rebuild-awareness-engine-spec.md)
+- [PRD + Technical Design - المواصفة التنفيذية الكاملة](docs/prd-technical-design-awareness-engine.md)
 
-## MVP Scope (L0-L4)
+## System Architecture
+
+### Seven Subsystems — Seven Functional Boundaries
+
+The engine is organised into **seven subsystems** that each own a range of **linguistic layers (L0–L19)**.
+
+| Subsystem | Layers | Purpose |
+|-----------|--------|---------|
+| Unicode & Orthography | L0–L1 | Decompose raw text; normalise Arabic orthography |
+| Phonology & Morphology | L2–L4 | Phoneme atoms; syllabic patterns; triliteral root derivation |
+| Lexical Semantics | L5–L8 | Lexeme formation; Wad/Naql/Majaz meaning registry; indications & relations |
+| Inference (UCR closure) | L9–L11 | Speech-act classification; Mantuq/Mafhum extraction; Illa modelling |
+| Rules & Tarjih | L11–L12 | Rule synthesis; conflict detection; preference weighting |
+| Manat & Tanzil | L13–L14 | Case-feature verification; applicability decision (true/false/suspend) |
+| Fractal Awareness | L15–L19 | Concept → Scale → Spirit → Inclination → Will-in-act |
+
+> **Note — Subsystems ≠ Layers.**  The **seven subsystems** describe *functional boundaries*
+> (FastAPI route groups, Python service modules).  The **twenty layers (L0–L19)** describe
+> *epistemic granularity* — each layer adds one kind of linguistic knowledge to the shared
+> `run_id` record.  The two counts refer to different axes of the same system.
+
+### UCR (Utterance Closure) vs. Fractal Awareness
+
+These two concepts are often mentioned together but they behave differently:
+
+| | UCR closure (L0–L14) | Fractal Awareness (L15–L19) |
+|---|---|---|
+| **Goal** | Fully assign every token a linguistic role | Transform closed utterances into an executable decision |
+| **Failure mode** | Errors **accumulate** — all gates run; dashboard shows which failed | Chain **stops** on first `suspend` or `false` |
+| **Output** | Structured record with quality scores per gate | Single `action ∈ {do, avoid, suspend}` |
+| **Analogy** | Compiler that reports *all* warnings | Circuit breaker that trips on first fault |
+
+### Qiyas — Analogical Reasoning
+
+Qiyas transfers a known judgment (**Hukm**) from a source case (**Asl**) to a new case (**Far**)
+when they share an effective cause (**Illa**).  The indication type is described by the
+canonical `DaalType` enum:
+
+`mutabaqa` · `tadammun` · `iltizam` · `nass` · `zahir` · `mafhum`
+
+> **Naming rule:** always use `DaalType`.  The informal aliases `DaalForm` and `DaalFunction`
+> must not appear in code or documentation — they were identified as a source of ambiguity.
+
+### AQL — Arabic Query Layer
+
+**AQL (Arabic Query Layer)** is the cross-system schema vocabulary that makes every artifact
+produced by the pipeline addressable and queryable regardless of which layer produced it.
+
+- **Node types:** `GToken`, `Morpheme`, `Root`, `Lexeme`, `Sense`, `Rule`, `ManatUnit`,
+  `QiyasUnit`, `ConceptUnit`, and more.
+- **Edge types:** `DERIVES_FROM`, `HAS_SENSE`, `GOVERNED_BY`, `TRANSFERS_TO`, `SCALES_TO`, etc.
+- **AQL Matrix:** a tabular view of which node types are present/absent for a given `run_id`,
+  visualised in the Web Dashboard as the **AQL layer matrix**.
+
+Endpoints: `GET /graph/schema` · `GET /graph/templates` · `POST /graph/analyze`
+
+## Layers (L0–L19)
 
 - L0 Unicode Raw: تفكيك النص إلى Unicode Scalars مع تتبع المواضع.
 - L1 Orthographic Normalization: تطبيع إملائي عربي مع قياس نسبة التغيير.
 - L2 Phonetic Atomization: تحويل كل حرف إلى Atom نوعه `C/V/S/X`.
 - L3 Syllabification: توليد مقاطع عربية هيوريستيكية وأنماطها (`CV`, `CVC`, ...).
 - L4 Root-Pattern Derivation: اشتقاق جذور ثلاثية هيوريستيكية + اسم وزن وصيغ الزيادات.
+- L5 Lexeme Formation: تشكيل الوحدات المعجمية مع تصنيف الأجزاء النحوية.
+- L6–L8 Meaning Registry: تسجيل المعاني بطبقاتها الثلاث (وضع / نقل / مجاز) + دلالة + علاقات.
+- L9–L11 Inference: تصنيف الكلام (خبر/إنشاء) + منطوق + مفهوم + علّة.
+- L11–L12 Rules & Tarjih: تركيب الأحكام + رصد التعارضات + الترجيح.
+- L13–L14 Manat & Tanzil: التحقق من المناط + التنزيل (ينطبق/لا ينطبق/تعليق).
+- L15–L19 Fractal Awareness: مفهوم → ميزان → روح → ميل → إرادة فعلية.
 
 ## API Endpoints
 
@@ -34,6 +102,7 @@ Protected endpoints (Bearer token required):
 - `POST /rule/evaluate`
 - `POST /manat/apply`
 - `POST /awareness/apply`
+- `POST /qiyas/transfer`
 - `GET /explain/{run_id}`
 - `GET /trace/{run_id}`
 - `POST /v1/analyze/unicode`
@@ -43,6 +112,7 @@ Protected endpoints (Bearer token required):
 - `POST /v1/rule/evaluate`
 - `POST /v1/manat/apply`
 - `POST /v1/awareness/apply`
+- `POST /v1/qiyas/transfer`
 - `GET /v1/explain/{run_id}`
 - `GET /v1/trace/{run_id}`
 
@@ -108,6 +178,11 @@ Use token as `Authorization: Bearer <access_token>`.
 
 Migration SQL: `migrations/001_mvp_l0_l4.sql`
 
+### Qiyas Tables
+
+- `qiyas_units`
+- `qiyas_daal_links`
+
 Phase 2 migration: `migrations/002_semantic_core.sql`
 
 Phase 3 migration: `migrations/003_inference_core.sql`
@@ -117,6 +192,10 @@ Phase 4 migration: `migrations/004_manat_tanzil_core.sql`
 Phase 5 migration: `migrations/005_explainability_observability.sql`
 
 Phase 6 migration: `migrations/006_awareness_layer.sql`
+
+Graph schema migration: `migrations/007_graph_schema.sql`
+
+Qiyas core migration: `migrations/008_qiyas_core.sql`
 
 ## Run Locally
 
