@@ -334,9 +334,11 @@ class QiyasEvidenceIn(BaseModel):
 
 class QiyasTransferIn(BaseModel):
     asl_text: str = Field(min_length=1, max_length=2000)
-    asl_judgment: str = Field(min_length=1, max_length=128)
+    # Allow empty strings so the pipeline can return transfer_state="suspend"
+    # instead of rejecting the request with 422.
+    asl_judgment: str = Field(max_length=128, default="")
     far_text: str = Field(min_length=1, max_length=2000)
-    illa_description: str = Field(min_length=1, max_length=1000)
+    illa_description: str = Field(max_length=1000, default="")
     daal_type: str = Field(default="mutabaqa", max_length=32)
     evidence: list[QiyasEvidenceIn] = Field(default_factory=list)
 
@@ -344,6 +346,10 @@ class QiyasTransferIn(BaseModel):
 class QiyasRequest(BaseModel):
     text: str = Field(min_length=1, max_length=20000)
     transfers: list[QiyasTransferIn] = Field(min_length=1)
+    # Optional: anchor transfers to an already-executed run instead of
+    # creating a new one.  When provided, the pipeline skips the inference
+    # step and attaches Qiyas rows to the existing PipelineRun.
+    run_id: str | None = Field(default=None, max_length=64)
 
     @field_validator("text")
     @classmethod

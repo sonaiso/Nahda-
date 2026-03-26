@@ -30,6 +30,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from app.models.entities import LayerExecution
+from app.models.entities import PipelineRun
 from app.models.entities import QiyasDaalLink
 from app.models.entities import QiyasUnit
 from app.services.inference_pipeline import run_inference_pipeline
@@ -198,24 +199,38 @@ def run_qiyas_pipeline(
     db: Session,
     text: str,
     transfers: list[QiyasTransferInput],
-) -> QiyasPipelineResult:
-    """Run the Qiyas pipeline on *text* and apply each requested transfer.
+    run_id: str | None = None,
+) -> QiyasPipelineResult | None:
+    """Run the Qiyas pipeline and apply each requested transfer.
 
-    The pipeline first runs the inference layer to establish a ``run_id``,
-    then persists every ``QiyasUnit`` and its supporting ``QiyasDaalLink``
-    rows, and finally emits a ``LayerExecution`` record for observability.
+    When *run_id* is provided the pipeline attaches Qiyas rows to the
+    existing ``PipelineRun`` without re-running the inference layer.
+    Returns ``None`` if the given *run_id* does not exist in the database.
+
+    When *run_id* is ``None`` the pipeline runs the inference layer on
+    *text* to obtain a fresh ``run_id``.
 
     Parameters
     ----------
     db:
         Active SQLAlchemy session.
     text:
-        Arabic input text to analyse (used to anchor the run_id).
+        Arabic input text to analyse.  Required when *run_id* is ``None``;
+        ignored (but still accepted) when anchoring to an existing run.
     transfers:
         One or more ``QiyasTransferInput`` descriptors.
+    run_id:
+        Optional identifier of an existing ``PipelineRun`` to anchor to.
     """
-    inference = run_inference_pipeline(db=db, text=text)
-    run_id = inference.run_id
+    if run_id is not None:
+        existing_run = db.query(PipelineRun).filter(PipelineRun.id == run_id).first()
+        if not existing_run:
+            return None
+        normalized_text = text
+    else:
+        inference = run_inference_pipeline(db=db, text=text)
+        run_id = inference.run_id
+        normalized_text = inference.normalized_text
 
     results: list[QiyasTransferResult] = []
 
@@ -294,7 +309,7 @@ def run_qiyas_pipeline(
 
     return QiyasPipelineResult(
         run_id=run_id,
-        normalized_text=inference.normalized_text,
+        normalized_text=normalized_text,
         transfers=results,
         valid_count=valid_count,
         invalid_count=invalid_count,

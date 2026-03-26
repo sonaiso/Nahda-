@@ -131,8 +131,25 @@ def test_qiyas_transfer_valid() -> None:
 
 
 def test_qiyas_transfer_suspend_on_empty_asl_judgment() -> None:
-    """Transfer must be suspended when asl_judgment is empty."""
+    """Transfer must be suspended when asl_judgment is empty (not 422)."""
     bad_transfer = {**VALID_TRANSFER, "asl_judgment": " "}
+    with TestClient(create_app()) as client:
+        headers = get_auth_headers(client)
+        resp = client.post(
+            "/qiyas/transfer",
+            json={"text": TEXT, "transfers": [bad_transfer]},
+            headers=headers,
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    transfer = data["transfers"][0]
+    assert transfer["transfer_state"] == "suspend"
+    assert data["metrics"]["suspend_count"] == 1
+
+
+def test_qiyas_transfer_suspend_on_empty_illa_description() -> None:
+    """Transfer must be suspended when illa_description is empty (not 422)."""
+    bad_transfer = {**VALID_TRANSFER, "illa_description": ""}
     with TestClient(create_app()) as client:
         headers = get_auth_headers(client)
         resp = client.post(
@@ -231,3 +248,47 @@ def test_qiyas_transfer_daal_links_recorded() -> None:
     assert len(links) == 2
     assert links[0]["evidence_text"] == "دليل أول"
     assert links[0]["strength"] == "qat_i"
+
+
+def test_qiyas_transfer_with_existing_run_id() -> None:
+    """Providing run_id anchors transfers to an existing run instead of
+    creating a new inference pass."""
+    with TestClient(create_app()) as client:
+        headers = get_auth_headers(client)
+
+        # Create a run first via the infer endpoint
+        infer_resp = client.post("/infer", json={"text": TEXT}, headers=headers)
+        assert infer_resp.status_code == 200
+        existing_run_id = infer_resp.json()["run_id"]
+
+        # Now anchor Qiyas to that existing run
+        resp = client.post(
+            "/qiyas/transfer",
+            json={
+                "text": TEXT,
+                "run_id": existing_run_id,
+                "transfers": [VALID_TRANSFER],
+            },
+            headers=headers,
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    # The returned run_id must be the same as the one we supplied
+    assert data["run_id"] == existing_run_id
+    assert data["metrics"]["valid_count"] == 1
+
+
+def test_qiyas_transfer_unknown_run_id_returns_404() -> None:
+    """Supplying an unknown run_id must return 404."""
+    with TestClient(create_app()) as client:
+        headers = get_auth_headers(client)
+        resp = client.post(
+            "/qiyas/transfer",
+            json={
+                "text": TEXT,
+                "run_id": "00000000-0000-0000-0000-000000000000",
+                "transfers": [VALID_TRANSFER],
+            },
+            headers=headers,
+        )
+    assert resp.status_code == 404

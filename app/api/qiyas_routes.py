@@ -23,6 +23,10 @@ def qiyas_transfer(payload: QiyasRequest, db: Session = Depends(get_db)) -> Qiya
     case (Far) via an effective cause (Illa).  The ``daal_type`` field must be
     one of the canonical ``DaalType`` values:
     ``mutabaqa``, ``tadammun``, ``iltizam``, ``nass``, ``zahir``, ``mafhum``.
+
+    Supply ``run_id`` to anchor the transfers to an already-executed pipeline
+    run.  When omitted, the inference layer is run on ``text`` first to create
+    a new run.
     """
     try:
         transfer_inputs = [
@@ -40,7 +44,15 @@ def qiyas_transfer(payload: QiyasRequest, db: Session = Depends(get_db)) -> Qiya
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     with start_span("pipeline.qiyas_transfer", {"nahda.layer": "Qiyas"}):
-        result = run_qiyas_pipeline(db=db, text=payload.text, transfers=transfer_inputs)
+        result = run_qiyas_pipeline(
+            db=db,
+            text=payload.text,
+            transfers=transfer_inputs,
+            run_id=payload.run_id,
+        )
+
+    if result is None:
+        raise HTTPException(status_code=404, detail="run_id not found")
 
     return QiyasResponse(
         run_id=result.run_id,
