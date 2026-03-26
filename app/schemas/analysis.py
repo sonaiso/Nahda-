@@ -334,7 +334,7 @@ class QiyasEvidenceIn(BaseModel):
 
 class QiyasTransferIn(BaseModel):
     asl_text: str = Field(min_length=1, max_length=2000)
-    asl_judgment: str = Field(min_length=1, max_length=256)
+    asl_judgment: str = Field(min_length=1, max_length=128)
     far_text: str = Field(min_length=1, max_length=2000)
     illa_description: str = Field(min_length=1, max_length=1000)
     daal_type: str = Field(default="mutabaqa", max_length=32)
