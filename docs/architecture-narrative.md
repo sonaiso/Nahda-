@@ -4,9 +4,11 @@
 
 This document explains how a raw Arabic text travels through the Nahda
 engine from the first Unicode scalar to an actionable, fully traceable
-decision.  It is the authoritative human-readable companion to the
+decision.  It is a narrative, human-readable companion to the
 code-level specifications in `docs/fractal-arabic-engine-spec.md` and
-`docs/strict-rebuild-awareness-engine-spec.md`.
+`docs/strict-rebuild-awareness-engine-spec.md`.  JSON and schema examples
+in this document are simplified for exposition; the canonical and complete
+API contracts are defined by the code-level specifications.
 
 ---
 
